@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Guqula</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --bg:      #111214;
+    --surface: #191b1e;
+    --s2:      #202326;
+    --border:  #2b2d31;
+    --border2: #3a3d42;
+    --text:    #e8eaed;
+    --sub:     #9ea3ab;
+    --muted:   #4e5157;
+    --hi:      #d8dce2;
+    --white:   #ffffff;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: 'Courier Prime', 'Courier New', monospace;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+}
+
+body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.shell {
+    position: relative;
+    z-index: 1;
+    width: 500px;
+}
+
+/* HEADER */
+.header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 28px;
+}
+
+.wordmark {
+    font-family: 'Syne', sans-serif;
+    font-size: 52px;
+    font-weight: 800;
+    letter-spacing: -2.5px;
+    line-height: 1;
+    color: var(--white);
+}
+
+.wordmark em { font-style: normal; color: var(--muted); }
+
+.meta { text-align: right; padding-bottom: 6px; }
+
+.meta-line {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    line-height: 1.9;
+}
+
+/* DROPZONE */
+.dz-outer {
+    position: relative;
+    cursor: pointer;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.dz-outer::before, .dz-outer::after,
+.dz-corners::before, .dz-corners::after {
+    content: '';
+    position: absolute;
+    width: 14px; height: 14px;
+    border-color: var(--border2);
+    border-style: solid;
+    transition: border-color 0.2s, width 0.2s, height 0.2s;
+    z-index: 2;
+    pointer-events: none;
+}
+.dz-outer::before  { top:-1px;    left:-1px;  border-width: 1px 0 0 1px; }
+.dz-outer::after   { top:-1px;    right:-1px; border-width: 1px 1px 0 0; }
+.dz-corners::before { bottom:-1px; left:-1px;  border-width: 0 0 1px 1px; }
+.dz-corners::after  { bottom:-1px; right:-1px; border-width: 0 1px 1px 0; }
+
+.dz-outer:hover::before, .dz-outer:hover::after,
+.dz-outer:hover .dz-corners::before,
+.dz-outer:hover .dz-corners::after {
+    border-color: var(--hi);
+    width: 20px; height: 20px;
+}
+
+.dz-outer.active::before, .dz-outer.active::after,
+.dz-outer.active .dz-corners::before,
+.dz-outer.active .dz-corners::after {
+    border-color: var(--hi);
+    width: 20px; height: 20px;
+}
+
+.dz-inner {
+    display: block;
+    padding: 46px 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    text-align: center;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.dz-outer:hover .dz-inner,
+.dz-outer.active .dz-inner {
+    border-color: var(--border2);
+    background: var(--s2);
+}
+
+.dz-icon {
+    width: 30px; height: 30px;
+    margin: 0 auto 12px;
+    color: var(--muted);
+    display: block;
+    transition: color 0.2s;
+}
+
+.dz-outer:hover .dz-icon,
+.dz-outer.active .dz-icon { color: var(--sub); }
+
+.dz-primary {
+    font-size: 13px;
+    color: var(--sub);
+    letter-spacing: 0.02em;
+    margin-bottom: 4px;
+}
+
+.dz-secondary {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+}
+
+input[type="file"] { display: none; }
+
+/* FILE NAME */
+.file-name {
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: var(--sub);
+    margin-bottom: 14px;
+    min-height: 16px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* CONTROLS ROW */
+.controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+/* FORMAT SELECT */
+.format-wrap {
+    position: relative;
+    width: 130px;
+    flex-shrink: 0;
+}
+
+.format-wrap::after {
+    content: '▾';
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 10px;
+    color: var(--muted);
+    pointer-events: none;
+}
+
+select {
+    width: 100%;
+    height: 100%;
+    padding: 13px 34px 13px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    color: var(--sub);
+    font-family: 'Courier Prime', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    appearance: none;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.18s, color 0.18s;
+}
+
+select:hover { border-color: var(--hi); color: var(--hi); }
+select option { background: var(--s2); }
+
+/* BUTTON */
+.btn {
+    flex: 1;
+    padding: 13px;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    color: var(--hi);
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: color 0.18s, border-color 0.18s;
+}
+
+.btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--white);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.22s ease;
+    z-index: 0;
+}
+
+.btn:hover::after { transform: scaleX(1); }
+.btn:hover { color: var(--bg); border-color: var(--white); }
+.btn:active { transform: scale(0.99); }
+.btn span { position: relative; z-index: 1; }
+
+/* PROGRESS SEGS */
+.segs {
+    display: none;
+    gap: 2px;
+    margin-top: 12px;
+}
+
+.segs.show { display: flex; }
+
+.seg {
+    flex: 1;
+    height: 2px;
+    background: var(--border);
+    transition: background 0.12s;
+}
+
+.seg.on  { background: var(--hi); }
+.seg.err { background: #4b5563; }
+
+/* STATUS AREA */
+.status-block {
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+    min-height: 52px;
+}
+
+.status-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+    margin-bottom: 7px;
+}
+
+.status-msg {
+    font-size: 13px;
+    color: var(--sub);
+    line-height: 1.7;
+}
+
+/* SUMMARY ROW */
+.summary-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 12px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid var(--border);
+}
+
+.summary-stat {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+}
+
+/* RESULT ROWS */
+.result-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    gap: 12px;
+}
+
+.result-row:last-child { border-bottom: none; }
+
+.result-left {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    overflow: hidden;
+    flex: 1;
+    min-width: 0;
+}
+
+.pill {
+    display: inline-block;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border: 1px solid var(--border2);
+    color: var(--hi);
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.pill.accent {
+    border-color: var(--hi);
+    color: var(--white);
+}
+
+.result-name {
+    font-size: 12px;
+    color: var(--sub);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1.6;
+}
+
+.result-sizes {
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    margin-top: 2px;
+}
+
+.result-info {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+}
+
+.result-link {
+    color: var(--hi);
+    text-decoration: none;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border2);
+    transition: color 0.15s, border-color 0.15s;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.result-link:hover { color: var(--white); border-color: var(--sub); }
+
+/* ZIP ROW */
+.zip-row {
+    display: none;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+    justify-content: flex-end;
+}
+
+.zip-row.show { display: flex; }
+
+.zip-btn {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--hi);
+    text-decoration: none;
+    padding: 9px 18px;
+    border: 1px solid var(--border2);
+    background: var(--surface);
+    position: relative;
+    overflow: hidden;
+    transition: color 0.18s, border-color 0.18s;
+    display: inline-block;
+}
+
+.zip-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--white);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.22s ease;
+    z-index: 0;
+}
+
+.zip-btn:hover::after { transform: scaleX(1); }
+.zip-btn:hover { color: var(--bg); border-color: var(--white); }
+.zip-btn span { position: relative; z-index: 1; }
+
+/* FOOTER */
+.footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.foot-txt {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+}
+
+.indicator { display: flex; align-items: center; gap: 6px; }
+
+.dot { width: 5px; height: 5px; border-radius: 50%; background: var(--muted); }
+.dot.live { background: #6ee7b7; }
+.dot.err  { background: #9ca3af; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+    <div class="header">
+        <div class="wordmark">GU<em>QU</em>LA</div>
+        <div class="meta">
+            <div class="meta-line">Image Optimizer</div>
+            <div class="meta-line">Smart Compression · Batch</div>
+        </div>
+    </div>
+
+    <label class="dz-outer" id="dzOuter">
+        <div class="dz-inner">
+            <svg class="dz-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="3" y="3" width="26" height="26" rx="2" stroke="currentColor" stroke-width="1.2" stroke-dasharray="3 3"/>
+                <path d="M16 11v10M11 16l5-5 5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <div class="dz-primary">Drop images here or click to browse</div>
+            <div class="dz-secondary">JPG · PNG · WebP · Multiple files OK</div>
+        </div>
+        <div class="dz-corners"></div>
+        <input type="file" id="fileInput" accept="image/*" multiple>
+    </label>
+
+    <div class="file-name" id="fileName">—</div>
+
+    <div class="controls">
+        <div class="format-wrap">
+            <select id="formatSelect">
+                <option value="auto" selected>Auto</option>
+                <option value="jpg">JPG</option>
+                <option value="png">PNG</option>
+                <option value="webp">WebP</option>
+            </select>
+        </div>
+        <button class="btn" onclick="upload()"><span>Optimize →</span></button>
+    </div>
+
+    <div class="segs" id="segs">
+        <div class="seg" id="g0"></div><div class="seg" id="g1"></div>
+        <div class="seg" id="g2"></div><div class="seg" id="g3"></div>
+        <div class="seg" id="g4"></div><div class="seg" id="g5"></div>
+        <div class="seg" id="g6"></div><div class="seg" id="g7"></div>
+        <div class="seg" id="g8"></div><div class="seg" id="g9"></div>
+        <div class="seg" id="g10"></div><div class="seg" id="g11"></div>
+    </div>
+
+    <div class="status-block">
+        <div class="status-label">Status</div>
+        <div class="status-msg" id="status">Awaiting input.</div>
+    </div>
+
+    <div class="zip-row" id="zipRow">
+        <a class="zip-btn" id="zipLink" download><span>Download All (ZIP) →</span></a>
+    </div>
+
+    <div class="footer">
+    <div class="foot-txt">Seamless transformation</div>
+
+    <div class="indicator">
+        <div class="dot live" id="dot"></div>
+        <div class="foot-txt" id="connLabel">Ready</div>
+    </div>
+</div>
+
+<div class="credit">
+    <br>Built by Lethu Langa</br>
+</div>
+
+</div>
+
+<script>
+const fileInput = document.getElementById('fileInput');
+const fileName  = document.getElementById('fileName');
+const status    = document.getElementById('status');
+const dzOuter   = document.getElementById('dzOuter');
+const segsEl    = document.getElementById('segs');
+const dot       = document.getElementById('dot');
+const connLabel = document.getElementById('connLabel');
+const formatSel = document.getElementById('formatSelect');
+const zipRow    = document.getElementById('zipRow');
+const zipLink   = document.getElementById('zipLink');
+const bars      = Array.from({length:12}, (_,i) => document.getElementById('g'+i));
+
+fileInput.addEventListener('change', () => {
+    const n = fileInput.files.length;
+    fileName.textContent = n === 1
+        ? '\u21b3  ' + fileInput.files[0].name
+        : '\u21b3  ' + n + ' files selected';
+});
+
+dzOuter.addEventListener('dragover',  e => { e.preventDefault(); dzOuter.classList.add('active'); });
+dzOuter.addEventListener('dragleave', () => dzOuter.classList.remove('active'));
+dzOuter.addEventListener('drop', e => {
+    e.preventDefault(); dzOuter.classList.remove('active');
+    if (e.dataTransfer.files.length) {
+        fileInput.files = e.dataTransfer.files;
+        const n = e.dataTransfer.files.length;
+        fileName.textContent = n === 1
+            ? '\u21b3  ' + e.dataTransfer.files[0].name
+            : '\u21b3  ' + n + ' files selected';
+    }
+});
+
+let ticker = null;
+
+function startBars() {
+    segsEl.classList.add('show');
+    bars.forEach(b => b.classList.remove('on','err'));
+    let i = 0;
+    ticker = setInterval(() => { if (i < 10) bars[i++].classList.add('on'); }, 250);
+}
+
+function endBars(ok) {
+    clearInterval(ticker);
+    bars.forEach(b => { b.classList.remove('on','err'); b.classList.add(ok ? 'on' : 'err'); });
+}
+
+function fmtKB(bytes) {
+    if (bytes >= 1048576) return (bytes / 1048576).toFixed(1) + ' MB';
+    return (bytes / 1024).toFixed(1) + ' KB';
+}
+
+function pctSaved(before, after) {
+    return (((before - after) / before) * 100).toFixed(1) + '%';
+}
+
+async function upload() {
+    if (!fileInput.files.length) { status.textContent = 'Select files first.'; return; }
+
+    const fd = new FormData();
+    for (let f of fileInput.files) fd.append('files', f);
+    fd.append('format', formatSel.value);
+
+    status.textContent = 'Optimizing\u2026';
+    zipRow.classList.remove('show');
+    dot.className = 'dot live'; connLabel.textContent = 'Working';
+    startBars();
+
+    try {
+        const res  = await fetch('http://127.0.0.1:8000/upload/', { method:'POST', body:fd });
+        const data = await res.json();
+        endBars(true);
+        dot.className = 'dot live'; connLabel.textContent = 'Done';
+
+        let totalBefore = 0, totalAfter = 0;
+        data.files.forEach(f => { totalBefore += f.original_size; totalAfter += f.output_size; });
+
+        let html = `<div class="summary-row">
+            <span class="pill accent">${pctSaved(totalBefore, totalAfter)} saved</span>
+            <span class="summary-stat">${fmtKB(totalBefore)} &rarr; ${fmtKB(totalAfter)} total</span>
+        </div>`;
+
+        data.files.forEach(file => {
+            const url = 'http://127.0.0.1:8000' + file.download_url;
+            html += `<div class="result-row">
+                <div class="result-left">
+                    <span class="pill">${pctSaved(file.original_size, file.output_size)}</span>
+                    <div class="result-info">
+                        <span class="result-name">${file.original_name} &rarr; ${file.output_name}</span>
+                        <span class="result-sizes">${fmtKB(file.original_size)} &rarr; ${fmtKB(file.output_size)}</span>
+                    </div>
+                </div>
+                <a class="result-link" href="${url}" download>Download &rarr;</a>
+            </div>`;
+        });
+
+        status.innerHTML = html;
+
+        if (data.zip_url) {
+            zipLink.href = 'http://127.0.0.1:8000' + data.zip_url;
+            zipRow.classList.add('show');
+        }
+
+    } catch(e) {
+        endBars(false);
+        status.textContent = 'Upload failed \u2014 check server connection.';
+        dot.className = 'dot err'; connLabel.textContent = 'Error';
+    }
+}
+</script>
+
+</body>
+</html>
