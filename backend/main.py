@@ -1,6 +1,6 @@
 from fastapi import FastAPI, File, UploadFile, Form
 from fastapi.responses import FileResponse
-from fastapi.staticfiles import StaticFiles
+# from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image, ImageOps
 import os
@@ -9,7 +9,7 @@ import zipfile
 
 app = FastAPI()
 
-app.mount("/frontend", StaticFiles(directory="frontend"), name="frontend")
+# app.mount("/frontend", StaticFiles(directory="frontend"), name="frontend")
 
 app.add_middleware(
     CORSMiddleware,
