@@ -1,3 +1,29 @@
-venv
-zips
-*.zip 
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# FastAPI generated folders (your app output)
+uploads/
+outputs/
+zips/
+
+# Environment variables (very important for Render later)
+.env
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE settings
+.vscode/
+.idea/
+
+# Logs
+*.log
