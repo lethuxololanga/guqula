@@ -592,7 +592,7 @@ async function upload() {
     startBars();
 
     try {
-        const res  = await fetch('http://127.0.0.1:8000/upload/', { method:'POST', body:fd });
+        const res  = await fetch('https://guqula-api.onrender.com/upload/', { method:'POST', body:fd });
         const data = await res.json();
         endBars(true);
         dot.className = 'dot live'; connLabel.textContent = 'Done';
@@ -606,7 +606,7 @@ async function upload() {
         </div>`;
 
         data.files.forEach(file => {
-            const url = 'http://127.0.0.1:8000' + file.download_url;
+            const url = 'https://guqula-api.onrender.com' + file.download_url;
             html += `<div class="result-row">
                 <div class="result-left">
                     <span class="pill">${pctSaved(file.original_size, file.output_size)}</span>
@@ -622,7 +622,7 @@ async function upload() {
         status.innerHTML = html;
 
         if (data.zip_url) {
-            zipLink.href = 'http://127.0.0.1:8000' + data.zip_url;
+            zipLink.href = 'https://guqula-api.onrender.com' + data.zip_url;
             zipRow.classList.add('show');
         }
 
