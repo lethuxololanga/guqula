@@ -3,9 +3,13 @@ from fastapi.responses import FileResponse
 # from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image, ImageOps
+from pillow_heif import register_heif_opener
 import os
 import uuid
 import zipfile
+
+
+register_heif_opener()
 
 app = FastAPI()
 
